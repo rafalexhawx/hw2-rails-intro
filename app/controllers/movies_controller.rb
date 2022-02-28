@@ -7,9 +7,28 @@ class MoviesController < ApplicationController
     end
   
     def index
-      @movies = Movie.all
+      @all_ratings = @ratings_chosen = ['G','PG','PG-13','R']
+      @ratings_chosen = !params['ratings'].nil? ? params['ratings'].keys : session['ratings']
+      session['ratings'] = @ratings_chosen
+      
+      @class_title, @class_date = '', ''
+      if(!params.key?(:sort)) #sort not in request so no sorting done
+        @movies = Movie.with_ratings(session['ratings'])
+        session['sort'] = ''
+      elsif(params[:sort] == 'title') #sort by title
+      session['sort'] = params[:sort]
+        @movies = Movie.with_ratings(session['ratings']).order('title')
+        
+        @class_title = 'hilite'
+      elsif(params[:sort] == 'date') #sort by release_date
+      session['sort'] = params[:sort]
+        @movies = Movie.with_ratings(session['ratings']).order('release_date')
+        
+        @class_date = 'hilite'
+      end
+      
     end
-  
+    
     def new
       # default: render 'new' template
     end
